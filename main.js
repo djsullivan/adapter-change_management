@@ -189,7 +189,18 @@ class ServiceNowAdapter extends EventEmitter {
      * Note how the object was instantiated in the constructor().
      * get() takes a callback function.
      */
-     this.connector.get(callback);
+     this.connector.get(localcallback);
+
+     function localcallback(data, error) {
+
+         log.info("Executing local callback function");
+         if (error) {
+           callback(null, error);
+         }
+         else {
+           callback({result: [{change_ticket_number : 1, active: True, priority: 'high', descritption: 'Test description', work_start: '', work_end: '',change_ticket_key: "1" }]}, error);
+         }
+     }
   }
 
   /**
