@@ -193,12 +193,25 @@ class ServiceNowAdapter extends EventEmitter {
 
      function localcallback(data, error) {
 
-         log.info("Executing local callback function");
          if (error) {
            callback(null, error);
          }
          else {
-           callback({result: [{change_ticket_number : 1, active: True, priority: 'high', descritption: 'Test description', work_start: '', work_end: '',change_ticket_key: "1" }]}, error);
+            var mobject = JSON.parse(data.body);
+            var m = mobject.result;
+            var tickets = [];
+            for (var j=0; j<m.length; j++) {
+               var ticket = { change_ticket_number : m[j].number, 
+                              active: m[j].active, 
+                              priority: m[j].priority,
+                              work_start: m[j].work_start, 
+                              work_end: m[j].work_end, 
+                              description: m[j].description, 
+                              change_ticket_key: m[j].sys_id
+                            };
+               tickets.push(ticket); 
+            } 
+            callback(tickets, error);
          }
      }
   }
@@ -219,7 +232,27 @@ class ServiceNowAdapter extends EventEmitter {
      * Note how the object was instantiated in the constructor().
      * post() takes a callback function.
      */
-     this.connector.post(callback);
+     this.connector.post(localcallback);
+  
+     function localcallback(data, error) {
+
+         if (error) {
+           callback(null, error);
+         }
+         else {
+            var mobject = JSON.parse(data.body);
+            var m = mobject.result;
+            var ticket = { change_ticket_number : m.number, 
+                              active: m.active, 
+                              priority: m.priority,
+                              work_start: m.work_start, 
+                              work_end: m.work_end, 
+                              description: m.description, 
+                              change_ticket_key: m.sys_id
+                            };
+            callback(ticket, error);
+         }
+     }
   }
 }
 
